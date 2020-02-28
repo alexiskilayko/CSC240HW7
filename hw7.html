@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<head>
+<title>Phases of the Moon</title>
+<script src="./three.min.js"></script>
+
+<script>
+    var scene, camera, renderer;  // Three.js rendering basics.
+
+    var canvas;  // The canvas on which the image is rendered.
+
+    var earth;
+
+    var moon;
+
+    var earthMoon;
+
+    // Create the scene. This function is called once, as soon as the page loads.
+    // The renderer has already been created before this function is called.
+    function createWorld() {
+
+        renderer.setClearColor(0); // Set background color (0, or 0x000000, is black).
+        scene = new THREE.Scene(); // Create a new scene which we can add objects to.
+
+        // create a camera, sitting on the positive z-axis.  The camera is not part of the scene.
+        camera = new THREE.PerspectiveCamera(45, canvas.width/canvas.height, 0.1, 1000);
+        camera.position.z = 400; // pull back the camera
+        camera.position.y = 50;
+
+        ambientLight = new THREE.AmbientLight("white", .6);
+        scene.add(ambientLight);
+        ambientLight.position.set(0, 0, 50);
+
+        pointLight = new THREE.PointLight("white", 3, 300);
+        pointLight.position.set(0, 0, 100);
+        scene.add(pointLight);
+
+        sunLight = new THREE.PointLight("orange", 5);
+        var sunGeometry = new THREE.SphereGeometry(35, 25, 25);
+        var sunMaterial = new THREE.MeshLambertMaterial({ color: "red", opacity: 0.9, transparent: true});
+        var sunSphere = new THREE.Mesh(sunGeometry, sunMaterial);
+        sun = new THREE.Object3D();
+        sun.add(sunLight);
+        sun.add(sunSphere);
+
+        var earthGeometry = new THREE.SphereGeometry(20, 20, 20);
+        var earthMaterial = new THREE.MeshLambertMaterial({ color: "green" });
+        var earthSphere = new THREE.Mesh(earthGeometry, earthMaterial);
+        earthSphere.position.x = sunSphere.position.x + 100;
+        earth = new THREE.Object3D();
+        earth.add(earthSphere);
+
+        var moonGeometry = new THREE.SphereGeometry(8, 20, 20);
+        var moonMaterial = new THREE.MeshLambertMaterial({ color: "blue" });
+        var moonSphere = new THREE.Mesh(moonGeometry, moonMaterial);
+        moonSphere.position.x = earthSphere.position.x - 60;
+        moon = new THREE.Object3D();
+        moon.add(moonSphere);
+
+        axisMoon = new THREE.Object3D();
+        axisEarth = new THREE.Object3D();
+        axisMoon.position.x = earthSphere.position.x;
+
+        sun.add(axisEarth);
+        axisEarth.add(earth);
+        earth.add(axisMoon);
+        axisMoon.add(moon);
+
+        scene.add(sun);
+    }
+
+    // Render the scene. This is called for each frame of the animation.
+    function render() {
+        requestAnimationFrame( render );
+
+        axisEarth.rotation.y += 0.01;
+        axisMoon.rotation.y += 0.05;
+
+        renderer.render(scene, camera);
+    }
+
+    //----------------------------------------------------------------------------------
+
+    // The init() function is called by the onload event when the document has loaded.
+    function init() {
+        try {
+            canvas = document.getElementById("glcanvas");
+            renderer = new THREE.WebGLRenderer( { canvas: canvas, antialias: true} );
+        }
+        catch (e) {
+            document.getElementById("canvas-holder").innerHTML = "<h3><b>WebGL is not available.</b><h3>";
+            return;
+        }
+
+        // create world and render scene
+        createWorld();
+        render();
+    }
+
+</script>
+
+</head>
+<body onload="init()">
+<div id="canvas-holder">
+    <canvas id="glcanvas" width="600" height="400"></canvas>
+</div>
+</body>
+</html>
